@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desenho Operacional — Operação TRIUNFO / AZUVER 2026</title>
+    <style>
+        :root {
+            --bg-canvas: #0b0f17;
+            --bg-panel: #141c2b;
+            --bg-card: #1c2638;
+            --border-dark: #2a3b54;
+            --accent-gold: #eab308;
+            --accent-green: #22c55e;
+            --accent-blue: #38bdf8;
+            --accent-red: #ef4444;
+            --accent-purple: #c084fc;
+            --accent-pink: #f472b6;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-canvas);
+            color: var(--text-main);
+            line-height: 1.4;
+            padding: 16px;
+            min-width: 1300px;
+        }
+
+        /* Top Header */
+        header {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-dark);
+            border-left: 5px solid var(--accent-gold);
+            padding: 14px 20px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            font-size: 1.3rem;
+            letter-spacing: 0.5px;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tag-op {
+            background: #991b1b;
+            color: #fef2f2;
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            border: 1px solid #ef4444;
+        }
+
+        .header-left p {
+            font-size: 0.82rem;
+            color: var(--text-sub);
+            margin-top: 3px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-header {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-dark);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-header:hover {
+            border-color: var(--accent-gold);
+            color: #fff;
+        }
+
+        /* Quadro do Estado Final Desejado (EFD) */
+        .efd-banner {
+            background: linear-gradient(90deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+            border: 1px solid var(--border-dark);
+            border-radius: 6px;
+            padding: 12px 18px;
+            margin-bottom: 16px;
+            font-size: 0.82rem;
+        }
+
+        .efd-banner strong {
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            margin-right: 8px;
+        }
+
+        /* Matriz Gráfica Principal do Desenho Operacional */
+        .diagram-container {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-dark);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        .grid-header-fases {
+            display: grid;
+            grid-template-columns: 240px repeat(5, 1fr) 110px 220px;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .fase-title-box {
+            background-color: #1e293b;
+            border: 1px solid var(--border-dark);
+            border-radius: 4px;
+            padding: 8px 10px;
+            text-align: center;
+        }
+
+        .fase-title-box h3 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .fase-title-box span {
+            font-size: 0.7rem;
+            color: var(--accent-gold);
+            display: block;
+        }
+
+        /* Linhas do Diagrama */
+        .diagram-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .diagram-row {
+            display: grid;
+            grid-template-columns: 240px repeat(5, 1fr) 110px 220px;
+            gap: 6px;
+            min-height: 95px;
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(51, 65, 85, 0.4);
+            border-radius: 4px;
+        }
+
+        .row-label {
+            background-color: #1a2436;
+            border-right: 1px solid var(--border-dark);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .row-label h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .row-label span {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+        }
+
+        .row-label.op-sn { border-left: 4px solid var(--accent-blue); }
+        .row-label.op-ew { border-left: 4px solid var(--accent-green); }
+        .row-label.esf-info { border-left: 4px solid var(--accent-purple); }
+        .row-label.esf-hum { border-left: 4px solid var(--accent-pink); }
+
+        .fase-cell {
+            padding: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            background-size: 16px 16px;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        }
+
+        /* Ponto Decisivo (PD) */
+        .pd-node {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 2px solid var(--accent-blue);
+            color: #fff;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .pd-node:hover {
+            transform: scale(1.12);
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 12px rgba(234, 179, 8, 0.6);
+            z-index: 10;
+        }
+
+        .pd-node.cg-linked {
+            border-color: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .pd-node.status-conquistado {
+            background: linear-gradient(135deg, #166534, #14532d);
+            border-color: #4ade80;
+            color: #dcfce7;
+        }
+
+        .pd-node.status-andamento {
+            background: linear-gradient(135deg, #854d0e, #713f12);
+            border-color: #facc15;
+            color: #fef08a;
+        }
+
+        /* Centro de Gravidade Badge */
+        .cg-marker {
+            background: #991b1b;
+            border: 1px solid #f87171;
+            color: #fff;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Ponto de Decisão e Pausa Operacional */
+        .dp-marker {
+            background: #c2410c;
+            border: 1px solid #fb923c;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .pausa-marker {
+            border-left: 2px dashed #94a3b8;
+            border-right: 2px dashed #94a3b8;
+            height: 80%;
+            width: 8px;
+            opacity: 0.7;
+        }
+
+        /* Coluna Objetivos */
+        .obj-cell {
+            background-color: #1a2436;
+            border-left: 1px solid var(--border-dark);
+            border-right: 1px solid var(--border-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 6px;
+            flex-wrap: wrap;
+        }
+
+        .obj-badge {
+            background-color: #0f172a;
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            font-weight: 800;
+            font-size: 0.75rem;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Coluna EFD Resumo */
+        .efd-cell {
+            padding: 8px 10px;
+            font-size: 0.72rem;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            line-height: 1.3;
+            background-color: #111827;
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* =========================================================
+           PAINEL INFERIOR: DETALHAMENTO & LEGENDA
+        ========================================================= */
+        .bottom-panels {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .detail-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-dark);
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .detail-card h3 {
+            font-size: 0.95rem;
+            color: var(--accent-gold);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-dark);
+            padding-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pd-detail-body {
+            font-size: 0.85rem;
+        }
+
+        .pd-detail-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+            background-color: var(--bg-canvas);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.78rem;
+        }
+
+        .legenda-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.78rem;
+        }
+
+        .legenda-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Tabela dos 15 Pontos Decisivos */
+        .table-pd-container {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-dark);
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .table-pd-container h3 {
+            font-size: 0.95rem;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        table.table-pd {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        table.table-pd th, table.table-pd td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        table.table-pd th {
+            background-color: var(--bg-card);
+            color: var(--text-sub);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        table.table-pd tr:hover td {
+            background-color: rgba(255,255,255,0.02);
+        }
+
+        /* Conceito Sumário */
+        .conceito-box {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-dark);
+            border-radius: 6px;
+            padding: 18px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .conceito-box h3 {
+            color: var(--accent-gold);
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+
+        /* Print Mode */
+        @media print {
+            body { background: #fff; color: #000; min-width: 100%; }
+            header, .header-actions { display: none !important; }
+            .diagram-container, .efd-banner, .detail-card, .table-pd-container, .conceito-box {
+                background: #fff !important;
+                border: 1px solid #aaa !important;
+                color: #000 !important;
+                box-shadow: none !important;
+                page-break-inside: avoid;
+            }
+            .pd-node { background: #eee !important; color: #000 !important; border: 2px solid #333 !important; }
+            .fase-title-box, .row-label, .obj-cell, .efd-cell { background: #f5f5f5 !important; color: #000 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <h1>
+                DESENHO OPERACIONAL &middot; COMANDO CONJUNTO COBRA
+                <span class="tag-op">OPERAÇÃO TRIUNFO &middot; AZUVER</span>
+            </h1>
+            <p>Representação Gráfica e Lógica da Campanha no Teatro de Operações &middot; Fases 1 a 5, Linhas de Operação e Esforço</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn-header" onclick="resetStatus()">↺ Resetar Status</button>
+            <button class="btn-header" onclick="window.print()">🖨️ Imprimir / PDF</button>
+        </div>
+    </header>
+
+    <!-- Estado Final Desejado (EFD) -->
+    <div class="efd-banner">
+        <strong>Estado Final Desejado Operacional (EFD):</strong>
+        Forças Armadas de Vermelho neutralizadas; atuação das FAL e MACCO desarticulada no TO; integridade territorial de Cobalto e San Cristóbal mantida; Linhas de Comunicação (Ter, Mar e Ae) protegidas com fluxo garantido; faixa de segurança de 50 km conquistada em Vermelho; serviços essenciais e assistência humanitária ampliados; e legitimidade obtida perante a opinião pública.
+    </div>
+
+    <!-- Matriz Visual do Desenho Operacional -->
+    <div class="diagram-container">
+        
+        <!-- Cabeçalho das Fases -->
+        <div class="grid-header-fases">
+            <div class="fase-title-box" style="text-align: left; padding-left: 14px;">
+                <h3>LINHAS DE ATUAÇÃO</h3>
+                <span>Domínios e Esforços</span>
+            </div>
+            <div class="fase-title-box">
+                <h3>1ª FASE: PRELIMINARES</h3>
+                <span>Concentração Estratégica</span>
+            </div>
+            <div class="fase-title-box">
+                <h3>2ª FASE: MOLDAGEM</h3>
+                <span>Sit Aepc Favorável & Bloqueio</span>
+            </div>
+            <div class="fase-title-box">
+                <h3>3ª FASE: AÇÃO DECISIVA</h3>
+                <span>Ofensiva Terrestre / Naval</span>
+            </div>
+            <div class="fase-title-box">
+                <h3>4ª FASE: ESTABILIZAÇÃO</h3>
+                <span>Desarticulação FAL & Ass Hum</span>
+            </div>
+            <div class="fase-title-box">
+                <h3>5ª FASE: REVERSÃO</h3>
+                <span>Desmobilização dos Meios</span>
+            </div>
+            <div class="fase-title-box">
+                <h3>OBJETIVOS</h3>
+                <span>Obj Op</span>
+            </div>
+            <div class="fase-title-box" style="text-align: left; padding-left: 12px;">
+                <h3>ESTADO FINAL DESEJADO</h3>
+                <span>Critérios de Término</span>
+            </div>
+        </div>
+
+        <!-- Linhas de Operação e Esforço -->
+        <div class="diagram-grid">
+
+            <!-- Linha 1: L Op Sul - Norte (Terrestre) -->
+            <div class="diagram-row">
+                <div class="row-label op-sn">
+                    <h4>L Op SUL - NORTE</h4>
+                    <span>Manobra Terrestre (FTC / Bld)</span>
+                </div>
+                <!-- Fase 1 -->
+                <div class="fase-cell">
+                    <div class="pd-node status-conquistado" id="pd-node-1" onclick="selectPd(1)">1</div>
+                    <div class="pd-node status-conquistado" id="pd-node-2" onclick="selectPd(2)">2</div>
+                </div>
+                <!-- Fase 2 -->
+                <div class="fase-cell">
+                    <div class="pd-node status-andamento" id="pd-node-4" onclick="selectPd(4)">4</div>
+                    <div class="dp-marker">Ponto Decisão</div>
+                    <div class="pd-node status-planejado" id="pd-node-15" onclick="selectPd(15)">15</div>
+                </div>
+                <!-- Fase 3 -->
+                <div class="fase-cell">
+                    <div class="pd-node cg-linked status-planejado" id="pd-node-7" onclick="selectPd(7)">7</div>
+                    <div class="cg-marker">CG 1: F Ter Vm</div>
+                    <div class="pd-node status-planejado" id="pd-node-8" onclick="selectPd(8)">8</div>
+                    <div class="pausa-marker" title="Pausa Operacional"></div>
+                </div>
+                <!-- Fase 4 -->
+                <div class="fase-cell">
+                    <div class="pd-node status-planejado" id="pd-node-12" onclick="selectPd(12)">12</div>
+                </div>
+                <!-- Fase 5 -->
+                <div class="fase-cell">
+                    <div class="pd-node status-planejado" id="pd-node-13" onclick="selectPd(13)">13</div>
+                </div>
+                <!-- Obj -->
+                <div class="obj-cell">
+                    <span class="obj-badge">A</span>
+                    <span class="obj-badge">C</span>
+                    <span class="obj-badge">E</span>
+                </div>
+                <!-- EFD -->
+                <div class="efd-cell">
+                    F Ter Vm neutralizada; Faixa de 50 km conquistada e mantida; Região de Cobalto protegida.
+                </div>
+            </div>
+
+            <!-- Linha 2: L Op Leste - Oeste (Marítima / Anfíbia) -->
+            <div class="diagram-row">
+                <div class="row-label op-ew">
+                    <h4>L Op LESTE - OESTE</h4>
+                    <span>Operações Navais & Anfíbias</span>
+                </div>
+                <!-- Fase 1 -->
+                <div class="fase-cell">
+                    <div class="pd-node status-conquistado" id="pd-node-3" onclick="selectPd(3)">3</div>
+                </div>
+                <!-- Fase 2 -->
+                <div class="fase-cell">
+                    <div class="pd-node status-planejado" id="pd-node-5" onclick="selectPd(5)">5</div>
+                    <div class="pd-node status-planejado" id="pd-node-6" onclick="selectPd(6)">6</div>
+                </div>
+                <!-- Fase 3 -->
+                <div class="fase-cell">
+                    <div class="pd-node status-planejado" id="pd-node-14" onclick="selectPd(14)">14</div>
+                    <div class="dp-marker">San Cristóbal</div>
+                </div>
+                <!-- Fase 4 -->
+                <div class="fase-cell">
+                    <!-- Espaço em branco ou apoio -->
+                    <span style="font-size:0.7rem; color:var(--text-sub);">Consolidação</span>
+                </div>
+                <!-- Fase 5 -->
+                <div class="fase-cell">
+                    <div class="pd-node status-planejado" id="pd-node-13b" onclick="selectPd(13)">13</div>
+                </div>
+                <!-- Obj -->
+                <div class="obj-cell">
+                    <span class="obj-badge">C</span>
+                    <span class="obj-badge">D</span>
+                </div>
+                <!-- EFD -->
+                <div class="efd-cell">
+                    LCM de Azul preservadas; San Cristóbal retomada e sob soberania nacional; Fluxo PRODE garantido.
+                </div>
+            </div>
+
+            <!-- Linha 3: Linha de Esforço Informacional -->
+            <div class="diagram-row">
+                <div class="row-label esf-info">
+                    <h4>L ESF INFORMACIONAL</h4>
+                    <span>Op Info, Ciberdefesa & ComSoc</span>
+                </div>
+                <!-- Fase 1 -->
+                <div class="fase-cell">
+                    <span style="font-size:0.7rem; color:var(--text-sub);">Ações Preliminares</span>
+                </div>
+                <!-- Fase 2 -->
+                <div class="fase-cell">
+                    <span style="font-size:0.7rem; color:var(--text-sub);">Degradação C² Vm</span>
+                </div>
+                <!-- Fase 3 -->
+                <div class="fase-cell">
+                    <span style="font-size:0.7rem; color:var(--text-sub);">Apoio à Decisão</span>
+                </div>
+                <!-- Fase 4 -->
+                <div class="fase-cell">
+                    <div class="pd-node cg-linked status-planejado" id="pd-node-11" onclick="selectPd(11)">11</div>
+                    <div class="cg-marker">CG 2: FAL</div>
+                    <div class="pd-node status-planejado" id="pd-node-10" onclick="selectPd(10)">10</div>
+                </div>
+                <!-- Fase 5 -->
+                <div class="fase-cell">
+                    <div class="pd-node status-planejado" id="pd-node-13c" onclick="selectPd(13)">13</div>
+                </div>
+                <!-- Obj -->
+                <div class="obj-cell">
+                    <span class="obj-badge">B</span>
+                    <span class="obj-badge">G</span>
+                </div>
+                <!-- EFD -->
+                <div class="efd-cell">
+                    Braço armado da FAL desarticulado; Narrativas hostis neutralizadas; Apoio público favorável.
+                </div>
+            </div>
+
+            <!-- Linha 4: Linha de Esforço Humanitária -->
+            <div class="diagram-row">
+                <div class="row-label esf-hum">
+                    <h4>L ESF HUMANITÁRIA</h4>
+                    <span>Defesa Civil, Apoio Pop & Refugiados</span>
+                </div>
+                <!-- Fase 1 -->
+                <div class="fase-cell">
+                    <span style="font-size:0.7rem; color:var(--text-sub);">Triagem Inicial</span>
+                </div>
+                <!-- Fase 2 -->
+                <div class="fase-cell">
+                    <span style="font-size:0.7rem; color:var(--text-sub);">Apoio a Enchentes</span>
+                </div>
+                <!-- Fase 3 -->
+                <div class="fase-cell">
+                    <span style="font-size:0.7rem; color:var(--text-sub);">Corredor Humanitário</span>
+                </div>
+                <!-- Fase 4 -->
+                <div class="fase-cell">
+                    <div class="pd-node status-planejado" id="pd-node-9" onclick="selectPd(9)">9</div>
+                </div>
+                <!-- Fase 5 -->
+                <div class="fase-cell">
+                    <div class="pd-node status-planejado" id="pd-node-13d" onclick="selectPd(13)">13</div>
+                </div>
+                <!-- Obj -->
+                <div class="obj-cell">
+                    <span class="obj-badge">F</span>
+                </div>
+                <!-- EFD -->
+                <div class="efd-cell">
+                    Serviços básicos restabelecidos em Cobalto; População vulnerável amparada e deslocados integrados.
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Painéis Inferiores: Detalhes do PD e Legenda -->
+    <div class="bottom-panels">
+        
+        <!-- Cartão de Detalhamento do Ponto Decisivo -->
+        <div class="detail-card">
+            <h3>
+                <span>DETALHES DO PONTO DECISIVO SELECIONADO</span>
+                <span id="pd-status-pill" style="font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: #334155; color: #fff;">CLIQUE EM UM NÓ</span>
+            </h3>
+            
+            <div class="pd-detail-body" id="pd-detail-content">
+                <p style="color: var(--text-sub);">Clique em qualquer número de Ponto Decisivo (1 a 15) no diagrama acima para visualizar as tarefas críticas, forças responsáveis, critérios de sucesso e alterar o seu status operacional.</p>
+            </div>
+
+            <div class="pd-detail-meta" id="pd-detail-meta" style="display: none;">
+                <div>
+                    <span style="color: var(--text-sub); display: block;">Fase Vinculada:</span>
+                    <strong id="pd-meta-fase">---</strong>
+                </div>
+                <div>
+                    <span style="color: var(--text-sub); display: block;">Objetivos Apoiados:</span>
+                    <strong id="pd-meta-obj" style="color: var(--accent-gold);">---</strong>
+                </div>
+                <div>
+                    <span style="color: var(--text-sub); display: block;">Força Responsável:</span>
+                    <strong id="pd-meta-forca">---</strong>
+                </div>
+            </div>
+            
+            <div style="margin-top: 14px; display: flex; gap: 8px;" id="pd-btn-group" style="display: none;">
+                <button class="btn-header" style="background:#1e293b;" onclick="changePdStatus('planejado')">Marcar como Planejado</button>
+                <button class="btn-header" style="background:#854d0e; color:#fef08a;" onclick="changePdStatus('andamento')">Em Andamento</button>
+                <button class="btn-header" style="background:#166534; color:#86efac;" onclick="changePdStatus('conquistado')">Conquistado / Cumprido</button>
+            </div>
+        </div>
+
+        <!-- Legenda Doutrinária -->
+        <div class="detail-card">
+            <h3>LEGENDA DOUTRINÁRIA (MD33-M-02 / ECEME)</h3>
+            <div class="legenda-grid">
+                <div class="legenda-item">
+                    <div class="pd-node" style="width:28px; height:28px; font-size:0.75rem;">PD</div>
+                    <span>Ponto Decisivo</span>
+                </div>
+                <div class="legenda-item">
+                    <div class="cg-marker">CG</div>
+                    <span>Centro de Gravidade</span>
+                </div>
+                <div class="legenda-item">
+                    <div class="dp-marker">DP</div>
+                    <span>Ponto de Decisão</span>
+                </div>
+                <div class="legenda-item">
+                    <div class="pausa-marker"></div>
+                    <span>Pausa Operacional</span>
+                </div>
+                <div class="legenda-item">
+                    <div class="obj-badge" style="width:22px; height:22px; font-size:0.7rem;">Obj</div>
+                    <span>Objetivo Operacional</span>
+                </div>
+                <div class="legenda-item">
+                    <span style="border-left:3px solid var(--accent-blue); padding-left:4px;">L Op</span>
+                    <span>Linha de Operação</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tabela dos 15 Pontos Decisivos -->
+    <div class="table-pd-container">
+        <h3>Quadro Síntese dos Pontos Decisivos (PD 1 a PD 15)</h3>
+        <table class="table-pd">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">PD</th>
+                    <th>Descrição do Ponto Decisivo</th>
+                    <th>Fase da Campanha</th>
+                    <th>Objetivos Relacionados</th>
+                    <th>Força Componente Principal</th>
+                    <th>Status Atual</th>
+                </tr>
+            </thead>
+            <tbody id="table-pd-body">
+                <!-- Linhas preenchidas via script -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Conceito Sumário da Operação -->
+    <div class="conceito-box">
+        <h3>Conceito Sumário da Linha de Ação do Comando Conjunto COBRA</h3>
+        <p>O Comando Conjunto COBRA planejou sua campanha articulando os meios em cinco fases integradas. Na <strong>1ª Fase (Ações Preliminares)</strong>, executam-se a concentração estratégica, o desdobramento dos meios no TO, a segurança das estruturas críticas na porção Azul e a garantia do fluxo de PRODE, iniciando-se a triagem humanitária e as ações de informação. Na <strong>2ª Fase (Moldagem)</strong>, conquista-se a situação aeroespacial favorável para degradar o C² e a defesa aérea de Vermelho, sustentando operações defensivas simultâneas em Cobalto e San Cristóbal e cortando o fluxo de suprimentos adversário. Na <strong>3ª Fase (Ação Decisiva)</strong>, desencadeia-se a ofensiva sequencial combinada terrestre e naval para neutralizar a Força Terrestre de Vermelho (CG 1) e conquistar a faixa de segurança de 50 km em território inimigo. Na <strong>4ª Fase (Estabilização)</strong>, desarticula-se o braço armado da FAL (CG 2), consolidando a assistência humanitária e a legitimidade perante a opinião pública. Na <strong>5ª Fase (Reversão)</strong>, conclui-se a desmobilização com o alcance pleno do Estado Final Desejado.</p>
+    </div>
+
+    <!-- Scripts de Interatividade -->
+    <script>
+        const pdData = {
+            1: {
+                num: 1,
+                titulo: "Acionamento dos meios navais e aéreos + Concentração estratégica realizada",
+                fase: "1ª Fase: Ações Preliminares",
+                objs: "A, B, C, D",
+                forca: "Comando Conjunto / Todas as F Cte",
+                desc: "Desdobramento coordenado das Grandes Unidades terrestres, esquadrões da Força Aérea e meios de superfície da Marinha para as Áreas de Concentração Estratégica (ACE), garantindo a prontidão para o início da campanha."
+            },
+            2: {
+                num: 2,
+                titulo: "Estruturas Estratégicas na porção AZUL do TO protegidas",
+                fase: "1ª Fase: Ações Preliminares",
+                objs: "D",
+                forca: "FTC (Inf / Bld) & DAAe",
+                desc: "Estabelecimento de Postos de Segurança Estática e defesa antiaérea sobre usinas hidrelétricas, pontes estratégicas sobre os rios Paranapanema e Itararé, e refinarias de combustível."
+            },
+            3: {
+                num: 3,
+                titulo: "Fluxo Logístico de PRODE para AZUL assegurado",
+                fase: "1ª Fase: Ações Preliminares",
+                objs: "A, D",
+                forca: "FNC (Marinha) & CLTO",
+                desc: "Proteção das Linhas de Comunicação Marítimas (LCM) entre os portos de Vitória, Santos e Rio de Janeiro, garantindo a chegada ininterrupta de Produtos de Defesa essenciais ao esforço de guerra."
+            },
+            4: {
+                num: 4,
+                titulo: "Situação Aeroespacial favorável obtida",
+                fase: "2ª Fase: Moldagem",
+                objs: "A, C, D",
+                forca: "FAC (Força Aérea) & F Cj G Ciber",
+                desc: "Supressão de defesas aéreas inimigas (SEAD), neutralização de radares de longo alcance em Canoas e garantia de superioridade aérea tática para manobra da Força Terrestre."
+            },
+            5: {
+                num: 5,
+                titulo: "Fluxo Logístico de PRODE para VERMELHO reduzido/degradado",
+                fase: "2ª Fase: Moldagem",
+                objs: "A, C, E",
+                forca: "FNC, FAC & F Cj Op Esp",
+                desc: "Interdição de rotas de cabotagem adversárias no litoral sul e ataques de precisão/sabotagem em terminais de combustível de São Francisco do Sul e Araucária."
+            },
+            6: {
+                num: 6,
+                titulo: "Região de COBALTO e Ilha de SAN CRISTÓBAL asseguradas",
+                fase: "2ª Fase: Moldagem",
+                objs: "C",
+                forca: "FTC (Defesa de Área) & FNC",
+                desc: "Manutenção do terreno chave e contenção dos avanços ofensivos do 2º e 3º Corpos de Exército de Vermelho, repelindo incursões mecanizadas."
+            },
+            7: {
+                num: 7,
+                titulo: "Forças Terrestres e Anfíbias de VERMELHO neutralizadas (CG 1)",
+                fase: "3ª Fase: Ação Decisiva",
+                objs: "A, C",
+                forca: "FTC (Ação de Choque Blindada) & FAC",
+                desc: "Destruição do poder de combate das divisões mecanizadas e blindadas de Vermelho por meio de manobra ofensiva de flanco e fogo concentrado de artilharia pesada."
+            },
+            8: {
+                num: 8,
+                titulo: "Faixa de Segurança de 50 km em VERMELHO conquistada e mantida",
+                fase: "3ª Fase: Ação Decisiva",
+                objs: "E",
+                forca: "FTC (5ª Bda C Bld / 11ª Bda Inf Mec)",
+                desc: "Transposição de cursos d'água e avanço blindado em profundidade até a linha limite pré-fixada, estabelecendo posições defensivas vantajosas para negociação de paz."
+            },
+            9: {
+                num: 9,
+                titulo: "Ajuda humanitária consolidada na região afetada",
+                fase: "4ª Fase: Estabilização",
+                objs: "F",
+                forca: "Gpt Eng, C³M & Defesa Civil",
+                desc: "Distribuição maciça de água, alimentos e medicamentos às populações vitimadas por catástrofes climáticas e restabelecimento de pontes e serviços essenciais."
+            },
+            10: {
+                num: 10,
+                titulo: "Legitimação das Ações de AZUL assegurada perante a opinião pública",
+                fase: "4ª Fase: Estabilização",
+                objs: "G",
+                forca: "E7 ComSoc, E8 OpInfo",
+                desc: "Manutenção de cobertura transparente da imprensa nacional e internacional, neutralização de narrativas fraudulentas e garantia de legitimidade jurídica."
+            },
+            11: {
+                num: 11,
+                titulo: "Braço Armado das FAL e MACCO desarticulado (CG 2)",
+                fase: "4ª Fase: Estabilização",
+                objs: "B",
+                forca: "F Cj Op Esp & FTC",
+                desc: "Localização, isolamento e captura das lideranças da guerrilha, apreensão de depósitos clandestinos de armamento e desmantelamento da rede logística de apoio."
+            },
+            12: {
+                num: 12,
+                titulo: "Região de COBALTO e San Cristóbal estabilizadas",
+                fase: "4ª Fase: Estabilização",
+                objs: "B, D",
+                forca: "Polícia do Exército & Órgãos de Segurança",
+                desc: "Restauração da ordem pública, controle de trânsito em eixos vitais (BR-153 / BR-116) e transferência progressiva de autoridade para o governo civil local."
+            },
+            13: {
+                num: 13,
+                titulo: "Meios desmobilizados e revertidos (Estado Final Desejado)",
+                fase: "5ª Fase: Reversão",
+                objs: "EFD",
+                forca: "Todas as Forças Componentes",
+                desc: "Desmobilização dos reservistas, retorno dos meios aéreos e navais às bases de origem e passagem das frações para a manutenção de rotina."
+            },
+            14: {
+                num: 14,
+                titulo: "Região de SAN CRISTÓBAL retomada e litoral defendido",
+                fase: "3ª Fase: Ação Decisiva",
+                objs: "C",
+                forca: "FNC (Assalto Anfíbio) & Bda Inf Pqdt",
+                desc: "Operação combinada de retomada do arquipélago insular e expulsão de tropas anfíbias adversárias."
+            },
+            15: {
+                num: 15,
+                titulo: "Inimigo na frente Oeste do TO barrado",
+                fase: "2ª Fase: Moldagem",
+                objs: "A, C",
+                forca: "FTC (1º C Ex / Bda C Mec)",
+                desc: "Ações de economia de forças e defesa móvel bloqueando as vias de acesso na calha do Rio Paraná/Paranapanema."
+            }
+        };
+
+        let selectedPdId = null;
+        let pdStates = JSON.parse(localStorage.getItem('azuver_pd_states')) || {
+            1: "conquistado", 2: "conquistado", 3: "conquistado", 4: "andamento",
+            5: "planejado", 6: "planejado", 7: "planejado", 8: "planejado",
+            9: "planejado", 10: "planejado", 11: "planejado", 12: "planejado",
+            13: "planejado", 14: "planejado", 15: "planejado"
+        };
+
+        function selectPd(id) {
+            selectedPdId = id;
+            const pd = pdData[id];
+            if (!pd) return;
+
+            document.getElementById('pd-status-pill').innerText = pdStates[id].toUpperCase();
+            document.getElementById('pd-status-pill').className = `pd-badge status-${pdStates[id]}`;
+
+            document.getElementById('pd-detail-content').innerHTML = `
+                <h4 style="color:#fff; font-size:1.05rem; margin-bottom:6px;">PD ${pd.num}: ${pd.titulo}</h4>
+                <p style="color:#cbd5e1; line-height:1.5;">${pd.desc}</p>
+            `;
+
+            document.getElementById('pd-meta-fase').innerText = pd.fase;
+            document.getElementById('pd-meta-obj').innerText = pd.objs;
+            document.getElementById('pd-meta-forca').innerText = pd.forca;
+
+            document.getElementById('pd-detail-meta').style.display = 'grid';
+            document.getElementById('pd-btn-group').style.display = 'flex';
+        }
+
+        function changePdStatus(status) {
+            if (!selectedPdId) return;
+            pdStates[selectedPdId] = status;
+            localStorage.setItem('azuver_pd_states', JSON.stringify(pdStates));
+
+            // Atualiza nós visuais
+            document.querySelectorAll(`[id^="pd-node-${selectedPdId}"]`).forEach(node => {
+                node.classList.remove('status-planejado', 'status-andamento', 'status-conquistado');
+                node.classList.add(`status-${status}`);
+            });
+
+            selectPd(selectedPdId);
+            renderTable();
+        }
+
+        function resetStatus() {
+            if (confirm("Deseja redefinir o status de todos os Pontos Decisivos para a situação padrão inicial?")) {
+                localStorage.removeItem('azuver_pd_states');
+                location.reload();
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('table-pd-body');
+            tbody.innerHTML = Object.values(pdData).map(pd => `
+                <tr onclick="selectPd(${pd.num})" style="cursor:pointer;">
+                    <td><strong style="color:var(--accent-gold); font-size:0.9rem;">${pd.num}</strong></td>
+                    <td style="color:#fff; font-weight:600;">${pd.titulo}</td>
+                    <td>${pd.fase}</td>
+                    <td style="color:var(--accent-gold); font-weight:700;">${pd.objs}</td>
+                    <td>${pd.forca}</td>
+                    <td><span class="pd-badge status-${pdStates[pd.num]}">${pdStates[pd.num].toUpperCase()}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Aplica classes iniciais nos nós
+        Object.keys(pdStates).forEach(id => {
+            document.querySelectorAll(`[id^="pd-node-${id}"]`).forEach(node => {
+                node.classList.remove('status-planejado', 'status-andamento', 'status-conquistado');
+                node.classList.add(`status-${pdStates[id]}`);
+            });
+        });
+
+        renderTable();
+        selectPd(1);
+    </script>
+</body>
+</html>
